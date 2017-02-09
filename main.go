@@ -11,6 +11,7 @@ import (
 	"io"
 	"gopkg.in/tylerb/graceful.v1"
 	"time"
+	"strings"
 )
 
 var (
@@ -95,15 +96,19 @@ func (g *GitHubRateLimit) WriteTo(w io.Writer) {
 
 func main() {
 	addr := flag.String("addr", "0.0.0.0:8080", "HTTP Server address")
+	url := flag.String("url", "https://api.github.com", "Github API address")
 	username := flag.String("username", "", "GitHub username")
 	password := flag.String("password", "", "GitHub password")
-	url := flag.String("url", "https://api.github.com", "Github API address")
 	flag.Parse()
 
 	Addr = *addr
+	githubAddr = *url + "/rate_limit"
 	githubUsername = *username
 	githubPassword = *password
-	githubAddr = *url + "/rate_limit"
+
+	log.Println("Starting GitHub exporter.")
+	log.Println("Listening on:", "'" + Addr + "'",)
+	log.Println("Scrapping:", "'" + githubAddr + "'", "with username", "'" + githubUsername + "'", "and password", "'" + strings.Repeat("*", len(githubPassword)) + "'", ".")
 
 	server := &graceful.Server{
 		Timeout: 10 * time.Second,
@@ -122,7 +127,14 @@ func main() {
 
 				transport := http.Transport{}
 				resp, err := transport.RoundTrip(req)
+				if err != nil {
+					log.Println(err)
+				}
+
 				body, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					log.Println(err)
+				}
 
 				resp.Body.Close()
 
