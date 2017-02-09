@@ -70,7 +70,7 @@ func (g *GitHubRateLimit) WriteTo(w io.Writer) {
 
 	// GitHub Rate Reset: Resources
 	buf.WriteString(fmt.Sprintf("# HELP %s %s\n", "github_ratelimit_resources_reset", "GitHub Rate Reset: Resources"))
-	buf.WriteString(fmt.Sprintf("# TYPE %s %s\n", "github_ratelimit_resources_reset", "count"))
+	buf.WriteString(fmt.Sprintf("# TYPE %s %s\n", "github_ratelimit_resources_reset", "counter"))
 
 	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_reset", "core", g.Resources.Core.Reset))
 	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_reset", "search", g.Resources.Search.Reset))
@@ -87,7 +87,7 @@ func (g *GitHubRateLimit) WriteTo(w io.Writer) {
 	buf.WriteString(fmt.Sprintf("%s %d\n", "github_ratelimit_rate_remaining", g.Rate.Remaining))
 
 	buf.WriteString(fmt.Sprintf("# HELP %s %s\n", "github_ratelimit_rate_reset", "GitHub Rate Reset"))
-	buf.WriteString(fmt.Sprintf("# TYPE %s %s\n", "github_ratelimit_rate_reset", "count"))
+	buf.WriteString(fmt.Sprintf("# TYPE %s %s\n", "github_ratelimit_rate_reset", "counter"))
 	buf.WriteString(fmt.Sprintf("%s %d\n", "github_ratelimit_rate_reset", g.Rate.Reset))
 
 	io.Copy(w, buf)
