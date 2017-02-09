@@ -55,26 +55,26 @@ func (g *GitHubRateLimit) WriteTo(w io.Writer) {
 	buf.WriteString(fmt.Sprintf("# HELP %s %s\n", "github_ratelimit_resources_limit", "GitHub Rate Limit: Resources"))
 	buf.WriteString(fmt.Sprintf("# TYPE %s %s\n", "github_ratelimit_resources_limit", "gauge"))
 
-	buf.WriteString(fmt.Sprintf("%s{type=%s} %d\n", "github_ratelimit_resources_limit", "core", g.Resources.Core.Limit))
-	buf.WriteString(fmt.Sprintf("%s{type=%s} %d\n", "github_ratelimit_resources_limit", "search", g.Resources.Search.Limit))
-	buf.WriteString(fmt.Sprintf("%s{type=%s} %d\n", "github_ratelimit_resources_limit", "graphql", g.Resources.Graphql.Limit))
+	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_limit", "core", g.Resources.Core.Limit))
+	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_limit", "search", g.Resources.Search.Limit))
+	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_limit", "graphql", g.Resources.Graphql.Limit))
 
 
 	// GitHub Rate Remaining: Resources
 	buf.WriteString(fmt.Sprintf("# HELP %s %s\n", "github_ratelimit_resources_remaining", "GitHub Rate Remaining: Resources"))
 	buf.WriteString(fmt.Sprintf("# TYPE %s %s\n", "github_ratelimit_resources_remaining", "gauge"))
 
-	buf.WriteString(fmt.Sprintf("%s{type=%s} %d\n", "github_ratelimit_resources_remaining", "core", g.Resources.Core.Remaining))
-	buf.WriteString(fmt.Sprintf("%s{type=%s} %d\n", "github_ratelimit_resources_remaining", "search", g.Resources.Search.Remaining))
-	buf.WriteString(fmt.Sprintf("%s{type=%s} %d\n", "github_ratelimit_resources_remaining", "graphql", g.Resources.Graphql.Remaining))
+	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_remaining", "core", g.Resources.Core.Remaining))
+	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_remaining", "search", g.Resources.Search.Remaining))
+	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_remaining", "graphql", g.Resources.Graphql.Remaining))
 
 	// GitHub Rate Reset: Resources
 	buf.WriteString(fmt.Sprintf("# HELP %s %s\n", "github_ratelimit_resources_remaining", "GitHub Rate Reset: Resources"))
 	buf.WriteString(fmt.Sprintf("# TYPE %s %s\n", "github_ratelimit_resources_remaining", "count"))
 
-	buf.WriteString(fmt.Sprintf("%s{type=%s} %d\n", "github_ratelimit_resources_reset", "core", g.Resources.Core.Reset))
-	buf.WriteString(fmt.Sprintf("%s{type=%s} %d\n", "github_ratelimit_resources_reset", "search", g.Resources.Search.Reset))
-	buf.WriteString(fmt.Sprintf("%s{type=%s} %d\n", "github_ratelimit_resources_reset", "graphql", g.Resources.Graphql.Reset))
+	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_reset", "core", g.Resources.Core.Reset))
+	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_reset", "search", g.Resources.Search.Reset))
+	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_reset", "graphql", g.Resources.Graphql.Reset))
 
 
 	// GitHub Rate Rate
