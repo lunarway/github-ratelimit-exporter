@@ -69,8 +69,8 @@ func (g *GitHubRateLimit) WriteTo(w io.Writer) {
 	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_remaining", "graphql", g.Resources.Graphql.Remaining))
 
 	// GitHub Rate Reset: Resources
-	buf.WriteString(fmt.Sprintf("# HELP %s %s\n", "github_ratelimit_resources_remaining", "GitHub Rate Reset: Resources"))
-	buf.WriteString(fmt.Sprintf("# TYPE %s %s\n", "github_ratelimit_resources_remaining", "count"))
+	buf.WriteString(fmt.Sprintf("# HELP %s %s\n", "github_ratelimit_resources_reset", "GitHub Rate Reset: Resources"))
+	buf.WriteString(fmt.Sprintf("# TYPE %s %s\n", "github_ratelimit_resources_reset", "count"))
 
 	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_reset", "core", g.Resources.Core.Reset))
 	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_reset", "search", g.Resources.Search.Reset))
