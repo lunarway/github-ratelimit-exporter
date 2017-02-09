@@ -2,9 +2,8 @@ FROM alpine
 
 EXPOSE 8080
 
-ENV GOPATH=/tmp/go
-
 RUN set -ex \
+    && export GOPATH=/tmp/go \
     && apk add --update --no-cache --virtual .build-deps \
         git \
         go \
@@ -15,6 +14,7 @@ RUN set -ex \
     && cd $GOPATH/src/github.com/marcelosousaalmeida/github-ratelimit-exporter \
     && go build -o /bin/github-ratelimit-exporter *.go \
     && apk del .build-deps \
-    && rm -rf /tmp/* /root/.gitconfig
+    && rm -rf /tmp/* /root/.gitconfig \
+    && apk --update --no-cache add ca-certificates
 
 ENTRYPOINT ["/bin/github-ratelimit-exporter"]
