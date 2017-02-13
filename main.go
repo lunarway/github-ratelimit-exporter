@@ -1,17 +1,17 @@
 package main
 
 import (
-	"flag"
-	"net/http"
-	"log"
-	"io/ioutil"
-	"encoding/json"
-	"fmt"
 	"bytes"
-	"io"
+	"encoding/json"
+	"flag"
+	"fmt"
 	"gopkg.in/tylerb/graceful.v1"
-	"time"
+	"io"
+	"io/ioutil"
+	"log"
+	"net/http"
 	"strings"
+	"time"
 )
 
 var (
@@ -21,32 +21,30 @@ var (
 	Addr           = ""
 )
 
-
 type GitHubRateLimit struct {
 	Resources struct {
-			  Core    struct {
-					  Limit     int `json:"limit"`
-					  Remaining int `json:"remaining"`
-					  Reset     int `json:"reset"`
-				  } `json:"core"`
-			  Search  struct {
-					  Limit     int `json:"limit"`
-					  Remaining int `json:"remaining"`
-					  Reset     int `json:"reset"`
-				  } `json:"search"`
-			  Graphql struct {
-					  Limit     int `json:"limit"`
-					  Remaining int `json:"remaining"`
-					  Reset     int `json:"reset"`
-				  } `json:"graphql"`
-		  } `json:"resources"`
-	Rate      struct {
-			  Limit     int `json:"limit"`
-			  Remaining int `json:"remaining"`
-			  Reset     int `json:"reset"`
-		  } `json:"rate"`
+		Core struct {
+			Limit     int `json:"limit"`
+			Remaining int `json:"remaining"`
+			Reset     int `json:"reset"`
+		} `json:"core"`
+		Search struct {
+			Limit     int `json:"limit"`
+			Remaining int `json:"remaining"`
+			Reset     int `json:"reset"`
+		} `json:"search"`
+		Graphql struct {
+			Limit     int `json:"limit"`
+			Remaining int `json:"remaining"`
+			Reset     int `json:"reset"`
+		} `json:"graphql"`
+	} `json:"resources"`
+	Rate struct {
+		Limit     int `json:"limit"`
+		Remaining int `json:"remaining"`
+		Reset     int `json:"reset"`
+	} `json:"rate"`
 }
-
 
 func (g *GitHubRateLimit) WriteTo(w io.Writer) {
 	buf := &bytes.Buffer{}
@@ -58,7 +56,6 @@ func (g *GitHubRateLimit) WriteTo(w io.Writer) {
 	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_limit", "core", g.Resources.Core.Limit))
 	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_limit", "search", g.Resources.Search.Limit))
 	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_limit", "graphql", g.Resources.Graphql.Limit))
-
 
 	// GitHub Rate Remaining: Resources
 	buf.WriteString(fmt.Sprintf("# HELP %s %s\n", "github_ratelimit_resources_remaining", "GitHub Rate Remaining: Resources"))
@@ -76,7 +73,6 @@ func (g *GitHubRateLimit) WriteTo(w io.Writer) {
 	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_reset", "search", g.Resources.Search.Reset))
 	buf.WriteString(fmt.Sprintf("%s{type=\"%s\"} %d\n", "github_ratelimit_resources_reset", "graphql", g.Resources.Graphql.Reset))
 
-
 	// GitHub Rate Rate
 	buf.WriteString(fmt.Sprintf("# HELP %s %s\n", "github_ratelimit_rate_limit", "GitHub Rate Limit"))
 	buf.WriteString(fmt.Sprintf("# TYPE %s %s\n", "github_ratelimit_rate_limit", "gauge"))
@@ -93,7 +89,6 @@ func (g *GitHubRateLimit) WriteTo(w io.Writer) {
 	io.Copy(w, buf)
 }
 
-
 func main() {
 	addr := flag.String("addr", "0.0.0.0:8080", "HTTP Server address")
 	url := flag.String("url", "https://api.github.com", "Github API address")
@@ -107,8 +102,8 @@ func main() {
 	githubPassword = *password
 
 	log.Println("Starting GitHub exporter.")
-	log.Println("Listening on:", "'" + Addr + "'",)
-	log.Println("Scrapping:", "'" + githubAddr + "'", "with username", "'" + githubUsername + "'", "and password", "'" + strings.Repeat("*", len(githubPassword)) + "'", ".")
+	log.Println("Listening on:", "'"+Addr+"'")
+	log.Println("Scrapping:", "'"+githubAddr+"'", "with username", "'"+githubUsername+"'", "and password", "'"+strings.Repeat("*", len(githubPassword))+"'", ".")
 
 	server := &graceful.Server{
 		Timeout: 10 * time.Second,
