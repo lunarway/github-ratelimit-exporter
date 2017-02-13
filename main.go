@@ -22,7 +22,7 @@ var (
 	githubAddr     = ""
 )
 
-type GitHubRateLimit struct {
+type gitHubRateLimit struct {
 	Resources struct {
 		Core struct {
 			Limit     int `json:"limit"`
@@ -47,7 +47,7 @@ type GitHubRateLimit struct {
 	} `json:"rate"`
 }
 
-func (g *GitHubRateLimit) WriteTo(w io.Writer) {
+func (g *gitHubRateLimit) writeTo(w io.Writer) (int64, error) {
 	buf := &bytes.Buffer{}
 
 	// GitHub Rate Limit: Resources
@@ -88,6 +88,8 @@ func (g *GitHubRateLimit) WriteTo(w io.Writer) {
 	buf.WriteString(fmt.Sprintf("%s %d\n", "github_ratelimit_rate_reset", g.Rate.Reset))
 
 	io.Copy(w, buf)
+
+	return 0, nil
 }
 
 func main() {
@@ -134,10 +136,10 @@ func main() {
 
 				resp.Body.Close()
 
-				res := GitHubRateLimit{}
+				res := gitHubRateLimit{}
 				json.Unmarshal([]byte(body), &res)
 
-				res.WriteTo(w)
+				res.writeTo(w)
 			}),
 		},
 	}
