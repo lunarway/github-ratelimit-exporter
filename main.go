@@ -5,20 +5,21 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"gopkg.in/tylerb/graceful.v1"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	graceful "gopkg.in/tylerb/graceful.v1"
 )
 
 var (
+	address        = ""
 	githubUsername = ""
 	githubPassword = ""
 	githubAddr     = ""
-	Addr           = ""
 )
 
 type GitHubRateLimit struct {
@@ -96,19 +97,19 @@ func main() {
 	password := flag.String("password", "", "GitHub password")
 	flag.Parse()
 
-	Addr = *addr
+	address = *addr
 	githubAddr = *url + "/rate_limit"
 	githubUsername = *username
 	githubPassword = *password
 
 	log.Println("Starting GitHub exporter.")
-	log.Println("Listening on:", "'"+Addr+"'")
+	log.Println("Listening on:", "'"+address+"'")
 	log.Println("Scrapping:", "'"+githubAddr+"'", "with username", "'"+githubUsername+"'", "and password", "'"+strings.Repeat("*", len(githubPassword))+"'", ".")
 
 	server := &graceful.Server{
 		Timeout: 10 * time.Second,
 		Server: &http.Server{
-			Addr:        Addr,
+			Addr:        address,
 			ReadTimeout: time.Duration(5) * time.Second,
 			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				req, err := http.NewRequest("GET", githubAddr, nil)
