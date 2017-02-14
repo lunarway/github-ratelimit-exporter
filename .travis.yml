@@ -13,6 +13,7 @@ script:
 
 after_success:
   - ls -ltR
+  - printenv
   - |
     if [ "$TRAVIS_TAG" ]; then
       release.sh $GH_USERNAME $GH_TOKEN $TRAVIS_TAG
