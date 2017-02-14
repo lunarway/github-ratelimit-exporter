@@ -12,11 +12,9 @@ script:
   - gox -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}"
 
 after_success:
-  - ls -ltR
-  - printenv
   - |
     if [ "$TRAVIS_TAG" ]; then
-      release.sh $GH_USERNAME $GH_TOKEN $TRAVIS_TAG
+      ./release.sh $GH_USERNAME $GH_TOKEN $TRAVIS_TAG
     fi
 
 # vim:set et ts=2 sw=2:
