@@ -10,9 +10,10 @@ RUN set -ex \
         build-base \
     && cd /tmp \
     && git config --global http.https://gopkg.in.followRedirects true \
+    && go get gopkg.in/tylerb/graceful.v1 \
     && { go get -d github.com/marcelosousaalmeida/github-ratelimit-exporter ; : ; } \
     && cd $GOPATH/src/github.com/marcelosousaalmeida/github-ratelimit-exporter \
-    && go build -o /bin/github-ratelimit-exporter *.go \
+    && go build -o /bin/github-ratelimit-exporter main.go \
     && apk del .build-deps \
     && rm -rf /tmp/* /root/.gitconfig \
     && apk --update --no-cache add ca-certificates

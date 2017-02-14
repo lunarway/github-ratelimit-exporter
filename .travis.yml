@@ -6,6 +6,7 @@ env:
 before_install:
   - go get github.com/mitchellh/gox
   - go get github.com/tcnksm/ghr
+  - go get gopkg.in/tylerb/graceful.v1
 
 script:
   - gox -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}"
