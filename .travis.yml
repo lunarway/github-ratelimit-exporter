@@ -11,11 +11,11 @@ install:
 script:
   - gox -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}"
 
-deploy:
-  provider: script
-  script: release.sh $GH_USERNAME $GH_TOKEN $TRAVIS_TAG
-  skip_cleanup: true
-  on:
-    tags: true
+after_success:
+  - |
+    if [ "$TRAVIS_TAG" ]; then
+      release.sh $GH_USERNAME $GH_TOKEN $TRAVIS_TAG
+    if
+  - username "$GH_USERNAME" --token "$GH_TOKEN" --replace --prerelease --debug "$3" dist/
 
 # vim:set et ts=2 sw=2:
