@@ -1,8 +1,7 @@
 # GitHub Rate Limit Prometheus exporter
-===
+======
 [![Build Status](https://travis-ci.org/marceloalmeida/github-ratelimit-exporter.svg?branch=master)](https://travis-ci.org/marceloalmeida/github-ratelimit-exporter)
-[![Code Climate](https://codeclimate.com/github/marceloalmeida/github-ratelimit-exporter/badges/gpa.svg)](https://codeclimate.com/github/marceloalmeida/github-ratelimit-exporter)
-[![Issue Count](https://codeclimate.com/github/marceloalmeida/github-ratelimit-exporter/badges/issue_count.svg)](https://codeclimate.com/github/marceloalmeida/github-ratelimit-exporter)
+[![Maintainability](https://api.codeclimate.com/v1/badges/cdd1c4ee47b13b902f92/maintainability)](https://codeclimate.com/github/marcelosousaalmeida/github-ratelimit-exporter/maintainability)
 ---
 
 Simple GitHub Rate Limit Prometheus exporter, useful to keep on track your GitHub API requests.
