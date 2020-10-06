@@ -1,10 +1,13 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: github-ratelimit-exporter
   namespace: monitoring
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: github-ratelimit-exporter
   template:
     metadata:
       name: github-ratelimit-exporter
