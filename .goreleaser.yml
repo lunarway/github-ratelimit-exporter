@@ -1,36 +1,47 @@
 builds:
-  - env:
-    - CGO_ENABLED=0
+  - binary: github-ratelimit-exporter
+    id: github-ratelimit-exporter
+    main: .
+    goarch:
+    - amd64
+    goos:
+    - darwin
+    - linux
+    env:
+      - CGO_ENABLED=0
 
-  dockers:
+dockers:
   - dockerfile: Dockerfile-goreleaser
+    binaries:
+    - github-ratelimit-exporter
     image_templates:
     - "quay.io/lunarway/github-ratelimit-exporter:latest"
-    - "quay.io/lunarway/github-ratelimit-exporter:v{{ .Major }}"
-    - "quay.io/lunarway/github-ratelimit-exporter:v{{ .Major }}.{{ .Minor }}"
-    - "quay.io/lunarway/github-ratelimit-exporter:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
+    - "quay.io/lunarway/github-ratelimit-exporter:{{ .Tag }}"
 
-  archives:
-    - format: binary
-      name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
-      replacements:
-        darwin: darwin
-        linux: linux
-        windows: windows
-        386: i386
+archives:
+  - id: archives
+    format: binary
+    name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
+    replacements:
+      darwin: darwin
+      linux: linux
+      windows: windows
+      386: i386
 
-  checksum:
-    name_template: '{{ .ProjectName }}-checksums.txt'
 
-  snapshot:
-    name_template: "git-{{.Commit}}"
+checksum:
+  name_template: '{{ .ProjectName }}-checksums.txt'
 
-  release:
-    name_template: "v{{.Version}}"
+snapshot:
+  name_template: "git-{{.Commit}}"
 
-  changelog:
-    sort: asc
-    filters:
-      exclude:
-      - '^docs:'
-      - '^test:'
+release:
+  name_template: "v{{.Version}}"
+  prerelease: auto
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
