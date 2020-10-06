@@ -1,0 +1,40 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: github-ratelimit-exporter
+  namespace: monitoring
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: github-ratelimit-exporter
+      labels:
+        app: github-ratelimit-exporter
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9756'
+    spec:
+      containers:
+      - name: github-ratelimit-exporter
+        image: quay.io/lunarway/github-ratelimit-exporter:latest
+        args: [
+          "--github.user", "octocat",
+          "--github.access-token", "$(GITHUB_ACCESS_TOKEN)"
+        ]
+        env:
+        - name: GITHUB_ACCESS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: github.accessToken
+              name: github-ratelimit-exporter
+        ports:
+        - name: scrape
+          containerPort: 9756
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-ratelimit-exporter
+  namespace: monitoring
+data:
+  github.accessToken: <access-token>

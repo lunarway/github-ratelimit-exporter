@@ -1,20 +1,17 @@
 language: go
 go:
-  - 1.7
-env:
-  - "PATH=/home/travis/gopath/bin:$PATH"
-install:
-  - go get github.com/mitchellh/gox
-  - go get github.com/tcnksm/ghr
-  - go get gopkg.in/tylerb/graceful.v1
-
+- "1.15.2"
 script:
-  - gox -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}"
-
+- go build ./...
+- go test ./...
+services:
+- docker
 after_success:
-  - |
-    if [ "$TRAVIS_TAG" ]; then
-      ./release.sh $GH_USERNAME $GH_TOKEN $TRAVIS_TAG
-    fi
-
-# vim:set et ts=2 sw=2:
+- test -n "$TRAVIS_TAG" && docker login -u="lunarway+travis_ci" -p="$QUAY_TOKEN" quay.io
+deploy:
+- provider: script
+  skip_cleanup: true
+  script: curl -sL https://git.io/goreleaser | bash
+  on:
+    tags: true
+    condition: $TRAVIS_OS_NAME = linux

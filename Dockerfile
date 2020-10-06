@@ -1,21 +1,22 @@
-FROM alpine
+FROM golang:1.15.2 as builder
+WORKDIR /src
+ENV CGO_ENABLED=0
+ENV GOOS=linux
 
-EXPOSE 8080
+RUN apt-get update
+RUN apt-get install -y ca-certificates
 
-RUN set -ex \
-    && export GOPATH=/tmp/go \
-    && apk add --update --no-cache --virtual .build-deps \
-        git \
-        go \
-        build-base \
-    && cd /tmp \
-    && git config --global http.https://gopkg.in.followRedirects true \
-    && go get gopkg.in/tylerb/graceful.v1 \
-    && { go get -d github.com/marceloalmeida/github-ratelimit-exporter ; : ; } \
-    && cd $GOPATH/src/github.com/marceloalmeida/github-ratelimit-exporter \
-    && go build -o /bin/github-ratelimit-exporter main.go \
-    && apk del .build-deps \
-    && rm -rf /tmp/* /root/.gitconfig \
-    && apk --update --no-cache add ca-certificates
+COPY go.mod .
+COPY go.sum .
 
-ENTRYPOINT ["/bin/github-ratelimit-exporter"]
+RUN go mod download
+
+COPY . .
+
+RUN go build -o /tmp/github-ratelimit-exporter
+
+FROM scratch
+
+ENTRYPOINT [ "/github-ratelimit-exporter" ]
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /tmp/github-ratelimit-exporter /
