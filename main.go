@@ -25,8 +25,8 @@ func main() {
 	shutdownTimeout := flags.Duration("web.shutdown-timeout", 10*time.Second, "HTTP server graceful shutdown timeout. Set to 0 to disable shutdown timeout")
 	readTimeout := flags.Duration("web.request-read-timeout", 5*time.Second, "HTTP server read request timeout")
 	githubAddr := flags.String("github.url", "https://api.github.com/rate_limit", "URL for GitHub rate limit API")
-	githubUser := flags.String("github.user", "", "GitHub user to get rate limits for")
-	githubAccessToken := flags.String("github.access-token", "", "Access token for GitHub user defined in flag github.user")
+	var githubUsers githubUserValues
+	flags.Var(&githubUsers, "github.user", "GitHub users to get rate limits for. Repeat flag for multiple users.")
 
 	developmentLog := flags.Bool("log.development", false, "Log in human readable format")
 	var logLevel zapcore.Level
@@ -44,21 +44,21 @@ func main() {
 
 	log.Info("Starting GitHub ratelimit exporter")
 	log.Infof("Listening on: '%s'", *address)
-	log.Infof("Scrapping: '%s' with user name '%s' and access token '%s'", *githubAddr, *githubUser, strings.Repeat("*", len(*githubAccessToken)))
+	log.Infof("Scrapping: '%s' for user names %v", *githubAddr, githubUsers.String())
 
 	var (
 		rateLimit = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "github_ratelimit_limit_info",
 			Help: "Maximum number of requests permitted in a single rate limit window",
-		}, []string{"resource"})
+		}, []string{"username", "resource"})
 		rateRemaining = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "github_ratelimit_remaining_info",
 			Help: "Number of requests remaining in the current rate limit window",
-		}, []string{"resource"})
+		}, []string{"username", "resource"})
 		rateReset = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "github_ratelimit_reset_epoch_seconds_info",
 			Help: "Time at which the current rate limit window resets in UTC epoch seconds",
-		}, []string{"resource"})
+		}, []string{"username", "resource"})
 		rateErrors = prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "github_ratelimit_errors_total",
 			Help: "Total number of errors collecting rate limit values from GitHub",
@@ -66,14 +66,15 @@ func main() {
 	)
 	prometheus.MustRegister(rateLimit, rateRemaining, rateReset, rateErrors)
 
-	observe := func(resource string, v values) {
+	observe := func(userName, resource string, v values) {
 		log.With("values", v).
+			With("username", userName).
 			With("resource", resource).
-			Infof("Observing rate limit values: resource=%s remaining=%d", resource, v.Remaining)
+			Infof("Observing rate limit values: user=%s resource=%s remaining=%d", userName, resource, v.Remaining)
 
-		rateLimit.WithLabelValues(resource).Set(float64(v.Limit))
-		rateRemaining.WithLabelValues(resource).Set(float64(v.Remaining))
-		rateReset.WithLabelValues(resource).Set(float64(v.Reset))
+		rateLimit.WithLabelValues(userName, resource).Set(float64(v.Limit))
+		rateRemaining.WithLabelValues(userName, resource).Set(float64(v.Remaining))
+		rateReset.WithLabelValues(userName, resource).Set(float64(v.Reset))
 	}
 
 	server := &graceful.Server{
@@ -83,20 +84,27 @@ func main() {
 			Addr:        *address,
 			ReadTimeout: *readTimeout,
 			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				log.Info("Getting latest rate limit values")
-				res, err := getCurrentLimits(*githubAddr, *githubUser, *githubAccessToken, log)
-				if err != nil {
-					rateErrors.Inc()
-					log.Errorf("Failed to get latest values: %v", err)
+				var scrapeError bool
+				for _, githubUser := range githubUsers.values {
+					logger := log.With("username", githubUser.userName)
+					logger.Infof("Getting latest rate limit values for '%s'", githubUser.userName)
+					res, err := getCurrentLimits(*githubAddr, githubUser.userName, githubUser.accessToken, log)
+					if err != nil {
+						rateErrors.Inc()
+						logger.Errorf("Failed to get latest values: %v", err)
+						scrapeError = true
+						continue
+					}
+
+					observe(githubUser.userName, "core", res.Resources.Core)
+					observe(githubUser.userName, "search", res.Resources.Search)
+					observe(githubUser.userName, "graphql", res.Resources.GraphQL)
+					observe(githubUser.userName, "integration_manifest", res.Resources.IntegrationManifest)
+				}
+				if scrapeError {
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
-
-				observe("core", res.Resources.Core)
-				observe("search", res.Resources.Search)
-				observe("graphql", res.Resources.GraphQL)
-				observe("integration_manifest", res.Resources.IntegrationManifest)
-
 				promhttp.Handler().ServeHTTP(w, r)
 			}),
 		},
@@ -187,4 +195,46 @@ func newLogger(level zapcore.Level, development bool) *zap.SugaredLogger {
 		os.Exit(1)
 	}
 	return rawLog.Sugar()
+}
+
+// githubUserValues is a flag that collects user names and access tokens for a
+// GitHub user.
+type githubUserValues struct {
+	values []githubUser
+}
+
+type githubUser struct {
+	userName    string
+	accessToken string
+}
+
+var _ pflag.Value = &githubUserValues{}
+
+func (g *githubUserValues) String() string {
+	var userNames []string
+	for _, user := range g.values {
+		userNames = append(userNames, user.userName)
+	}
+	return fmt.Sprintf("[ %s ]", strings.Join(userNames, ","))
+}
+
+func (g *githubUserValues) Set(s string) error {
+	sections := strings.SplitN(s, "=", 2)
+	if len(sections) != 2 {
+		return fmt.Errorf("github user must be formatted as username=access-token: was %s", s)
+	}
+	userName := sections[0]
+	accessToken := sections[1]
+	if len(userName) == 0 || len(accessToken) == 0 {
+		return fmt.Errorf("github user must be formatted as username=access-token: was %s", s)
+	}
+	g.values = append(g.values, githubUser{
+		userName:    userName,
+		accessToken: accessToken,
+	})
+	return nil
+}
+
+func (g *githubUserValues) Type() string {
+	return "username=access-token"
 }
