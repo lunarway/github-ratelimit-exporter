@@ -17,12 +17,12 @@ Several pre-compiled binaries are available from the [releases page](https://git
 A docker image is also available on our Quay.io registry.
 
 ```
-docker run quay.io/lunarway/github-ratelimit-exporter --github.user octocat --github.access-token <access token for user>
+docker run quay.io/lunarway/github-ratelimit-exporter --github.user octocat=<access token for user>
 ```
 
 # Usage
 
-Provide a GitHub user name and access token to exporter limits based on that user.
+Provide a GitHub user name and access token to exporter limits based on that user (it is possible to provide multiple users).
 If you omit these fields the limits are based on unauthenticated requests.
 These are limited by the calling IP address.
 
@@ -32,7 +32,7 @@ To create a personal access token follow official documentation on [Creating a p
 It exposes prometheus metrics on `/` on port `9532` (can be configured).
 
 ```
-github-ratelimit-exporter --github.user octocat --github.access-token <access token for user>
+github-ratelimit-exporter --github.user octocat=<access token for user>
 ```
 
 See all configuration options with the `--help` flag
@@ -40,9 +40,8 @@ See all configuration options with the `--help` flag
 ```
 $ github-ratelimit-exporter --help
 Usage of github-ratelimit-exporter:
-      --github.access-token string          Access token for GitHub user defined in flag github.user
       --github.url string                   URL for GitHub rate limit API (default "https://api.github.com/rate_limit")
-      --github.user string                  GitHub user to get rate limits for
+      --github.user username=access-token   GitHub users to get rate limits for. Repeat flag for multiple users. (default [  ])
       --log.development                     Log in human readable format
       --log.level Level                     Logging level. Available values are 'debug', 'info', 'error' (default info)
       --web.listen-address string           HTTP server address exposing Prometheus metrics (default "0.0.0.0:9756")
@@ -70,15 +69,15 @@ This is useful if the exporter is to be depoyled in Kubernetes or other dockeriz
 Here is an example of running the exporter locally.
 
 ```
-$ docker run -p 9756:9756 github-ratelimit-exporter:latest --github.user octocat --github.access-token <access token> --log.development=true
-2020-10-06T20:13:10.714Z	info	src/main.go:45	Starting GitHub ratelimit exporter
-2020-10-06T20:13:10.715Z	info	src/main.go:46	Listening on: '0.0.0.0:9756'
-2020-10-06T20:13:10.715Z	info	src/main.go:47	Scrapping: 'https://api.github.com/rate_limit' with user name 'astrochimp' and access token '****************************************'
-2020-10-06T20:13:32.174Z	info	src/main.go:86	Getting latest rate limit values
-2020-10-06T20:13:35.516Z	info	src/main.go:72	Observing rate limit values: resource=core remaining=4839	{"values": {"limit":5000,"remaining":4839,"reset":1602017397}, "resource": "core"}
-2020-10-06T20:13:35.517Z	info	src/main.go:72	Observing rate limit values: resource=search remaining=30	{"values": {"limit":30,"remaining":30,"reset":1602015275}, "resource": "search"}
-2020-10-06T20:13:35.517Z	info	src/main.go:72	Observing rate limit values: resource=graphql remaining=5000	{"values": {"limit":5000,"remaining":5000,"reset":1602018815}, "resource": "graphql"}
-2020-10-06T20:13:35.517Z	info	src/main.go:72	Observing rate limit values: resource=integration_manifest remaining=5000	{"values": {"limit":5000,"remaining":5000,"reset":1602018815}, "resource": "integration_manifest"}
+$ docker run -p 9756:9756 github-ratelimit-exporter:latest --github.user octocat=<access token for user> --log.development=true
+2020-10-06T20:13:10.714Z	info	src/main.go:85	Starting GitHub ratelimit exporter
+2020-10-06T20:13:10.715Z	info	src/main.go:86	Listening on: '0.0.0.0:9756'
+2020-10-06T20:13:10.715Z	info	src/main.go:87	Scrapping: 'https://api.github.com/rate_limit' for user names [ octocat ]
+2020-10-06T20:13:32.174Z	info	src/main.go:130	Getting latest rate limit values for 'octocat'	{"username": "octocat"}
+2020-10-06T20:13:35.516Z	info	src/main.go:113	Observing rate limit values: user=octocat resource=core remaining=4839	{"values": {"limit":5000,"remaining":4839,"reset":1602017397}, "username": "octocat", "resource": "core"}
+2020-10-06T20:13:35.517Z	info	src/main.go:113	Observing rate limit values: user=octocat resource=search remaining=30	{"values": {"limit":30,"remaining":30,"reset":1602015275}, "username": "octocat", "resource": "search"}
+2020-10-06T20:13:35.517Z	info	src/main.go:113	Observing rate limit values: user=octocat resource=graphql remaining=5000	{"values": {"limit":5000,"remaining":5000,"reset":1602018815}, "username": "octocat", "resource": "graphql"}
+2020-10-06T20:13:35.517Z	info	src/main.go:113	Observing rate limit values: user=octocat resource=integration_manifest remaining=5000	{"values": {"limit":5000,"remaining":5000,"reset":1602018815}, "username": "octocat", "resource": "integration_manifest"}
 ```
 
 # Deployment
