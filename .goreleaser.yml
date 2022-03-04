@@ -3,20 +3,20 @@ builds:
     id: github-ratelimit-exporter
     main: .
     goarch:
-    - amd64
+      - amd64
     goos:
-    - darwin
-    - linux
+      - darwin
+      - linux
     env:
       - CGO_ENABLED=0
 
 dockers:
   - dockerfile: Dockerfile-goreleaser
     binaries:
-    - github-ratelimit-exporter
+      - github-ratelimit-exporter
     image_templates:
-    - "quay.io/lunarway/github-ratelimit-exporter:latest"
-    - "quay.io/lunarway/github-ratelimit-exporter:{{ .Tag }}"
+      - "quay.io/lunarway/github-ratelimit-exporter:latest"
+      - "quay.io/lunarway/github-ratelimit-exporter:{{ .Tag }}"
 
 archives:
   - id: archives
@@ -28,9 +28,8 @@ archives:
       windows: windows
       386: i386
 
-
 checksum:
-  name_template: '{{ .ProjectName }}-checksums.txt'
+  name_template: "{{ .ProjectName }}-checksums.txt"
 
 snapshot:
   name_template: "git-{{.Commit}}"
@@ -40,8 +39,4 @@ release:
   prerelease: auto
 
 changelog:
-  sort: asc
-  filters:
-    exclude:
-    - '^docs:'
-    - '^test:'
+  skip: true
