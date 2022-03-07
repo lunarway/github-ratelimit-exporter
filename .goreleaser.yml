@@ -12,8 +12,6 @@ builds:
 
 dockers:
   - dockerfile: Dockerfile-goreleaser
-    binaries:
-      - github-ratelimit-exporter
     image_templates:
       - "quay.io/lunarway/github-ratelimit-exporter:latest"
       - "quay.io/lunarway/github-ratelimit-exporter:{{ .Tag }}"
