@@ -1,5 +1,5 @@
 plan: false
 vars:
   service: github-ratelimit-exporter-fork
-  squad: esa
+  squad: dark-matter
   domain: developer-productivity
